@@ -27,10 +27,10 @@ class HomeTableViewController: UITableViewController {
     
     @objc func loadTweet() {
         
+        numberOfTweet = 20
         let tweetURL = "https://api.twitter.com/1.1/statuses/home_timeline.json"
-        let myParams = ["count": 10]
-        
-        TwitterAPICaller.client?.getDictionariesRequest(url: tweetURL, parameters: myParams, success: { (tweets: [NSDictionary]) in
+        let myParams = ["count": numberOfTweet]
+        TwitterAPICaller.client?.getDictionariesRequest(url: tweetURL, parameters: myParams as [String : Any], success: { (tweets: [NSDictionary]) in
             
             self.tweetArray.removeAll()
             
@@ -45,6 +45,37 @@ class HomeTableViewController: UITableViewController {
             print("could not receive tweets")
         })
         
+    }
+    
+    func loadMoreTweets() {
+        
+        let tweetURL = "https://api.twitter.com/1.1/statuses/home_timeline.json"
+        
+        // adds 20 more tweets
+        numberOfTweet += 20
+        let myParams = ["count": numberOfTweet]
+
+        TwitterAPICaller.client?.getDictionariesRequest(url: tweetURL, parameters: myParams as [String : Any], success: { (tweets: [NSDictionary]) in
+            
+            self.tweetArray.removeAll()
+            
+            for tweet in tweets {
+                self.tweetArray.append(tweet)
+            }
+            
+            self.tableView.reloadData()
+            self.refresh.endRefreshing()
+            
+        }, failure: { (error) in
+            print("could not receive tweets")
+        })
+    }
+    
+    // ran when user gets to end of page
+    override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        if indexPath.row + 1 == tweetArray.count {
+            loadMoreTweets()
+        }
     }
     
     @IBAction func onLogout(_ sender: Any) {
