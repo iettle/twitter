@@ -13,13 +13,19 @@ class HomeTableViewController: UITableViewController {
     var tweetArray = [NSDictionary]()
     var numberOfTweet: Int!
     
+    // refresher to pull to refresh
+    let refresh = UIRefreshControl()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         loadTweet()
+        
+        // pulls to refresh
+        refresh.addTarget(self, action: #selector(loadTweet), for: .valueChanged)
+        tableView.refreshControl = refresh
     }
     
-    func loadTweet() {
+    @objc func loadTweet() {
         
         let tweetURL = "https://api.twitter.com/1.1/statuses/home_timeline.json"
         let myParams = ["count": 10]
@@ -33,6 +39,7 @@ class HomeTableViewController: UITableViewController {
             }
             
             self.tableView.reloadData()
+            self.refresh.endRefreshing()
             
         }, failure: { (error) in
             print("could not receive tweets")
